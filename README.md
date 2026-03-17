@@ -17,10 +17,12 @@ git clone https://github.com/YOUR_USERNAME/data-engineering-batch-pipeline.git
 cd data-engineering-batch-pipeline
 ```
 # 2. Add dataset to /data folder (NYC Taxi CSV from Kaggle)
+https://www.kaggle.com/datasets/microize/newyork-yellow-taxi-trip-data-2020-2019?select=yellow_tripdata_2020-01.csv
 
 # 3. Start all services
+```bash
 docker-compose up --build
-
+```
 # 4. Check the API
 curl http://localhost:8000/health
 curl http://localhost:8000/aggregated/summary
