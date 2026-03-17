@@ -10,11 +10,12 @@ Spark, PostgreSQL, Airflow, and FastAPI — all containerized with Docker.
 Data Source → Kafka → PostgreSQL (raw) → Spark → PostgreSQL (aggregated) → FastAPI → ML App
 
 ## Quick Start (run the whole system)
-```bash
+
 # 1. Clone the repo
+```bash
 git clone https://github.com/YOUR_USERNAME/data-engineering-batch-pipeline.git
 cd data-engineering-batch-pipeline
-
+```
 # 2. Add dataset to /data folder (NYC Taxi CSV from Kaggle)
 
 # 3. Start all services
