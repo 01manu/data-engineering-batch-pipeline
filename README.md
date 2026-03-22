@@ -9,6 +9,34 @@ Spark, PostgreSQL, Airflow, and FastAPI — all containerized with Docker.
 ## Architecture
 Data Source → Kafka → PostgreSQL (raw) → Spark → PostgreSQL (aggregated) → FastAPI → ML App
 
+## Project Structure
+data-engineering-batch-pipeline/
+│
+├── 📄 docker-compose.yml           # IaC — defines all 7 microservices
+├── 📄 README.md                    # This file
+│
+├── 📂 kafka-producer/
+│   ├── 📄 Dockerfile               # python:3.11-slim image
+│   └── 📄 producer.py              # Reads CSV → Kafka topic + PostgreSQL
+│
+├── 📂 spark-processor/
+│   ├── 📄 Dockerfile               # apache/spark:3.5.0 image
+│   └── 📄 batch_job.py             # GroupBy aggregations via JDBC
+│
+├── 📂 api/
+│   ├── 📄 Dockerfile               # python:3.11-slim image
+│   └── 📄 main.py                  # 5 REST endpoints (FastAPI)
+│
+├── 📂 airflow/
+│   └── 📂 dags/
+│       └── 📄 batch_dag.py         # Quarterly DAG scheduler
+│
+├── 📂 jars/
+│   └── 📄 postgresql-42.7.3.jar    # PostgreSQL JDBC driver for Spark
+│
+└── 📂 data/
+    └── 📄 yellow_tripdata_2020-01.csv   # Dataset (not tracked in Git)
+
 ## Quick Start (run the whole system)
 
 # 1. Clone the repo
