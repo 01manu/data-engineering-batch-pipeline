@@ -9,28 +9,27 @@ Spark, PostgreSQL, Airflow, and FastAPI — all containerized with Docker.
 ## Architecture
 Data Source → Kafka → PostgreSQL (raw) → Spark → PostgreSQL (aggregated) → FastAPI → ML App
 
-┌─────────────────────────────────────────────────────────────────────────┐
-│                        Docker Bridge Network                            │
-│                                                                         │
-│  ┌──────────┐    ┌───────────┐    ┌────────────┐    ┌───────────────┐  │
-│  │  DATA    │    │  APACHE   │    │ POSTGRESQL │    │    APACHE     │  │
-│  │  SOURCE  │───▶│   KAFKA   │───▶│  raw_data  │───▶│    SPARK      │  │
-│  │ NYC Taxi │    │  + Zoo-   │    │   table    │    │  batch_job.py │  │
-│  │  CSV     │    │  keeper   │    └────────────┘    └──────┬────────┘  │
-│  └──────────┘    └───────────┘                             │           │
-│                                                            ▼           │
-│  ┌──────────┐    ┌───────────┐    ┌────────────┐          │           │
-│  │    ML    │    │  FAST     │    │ POSTGRESQL │◀─────────┘           │
-│  │   APP    │◀───│   API     │◀───│ aggregated │                      │
-│  │(external)│    │  :8000    │    │   table    │                      │
-│  └──────────┘    └───────────┘    └────────────┘                      │
-│                                                                         │
-│                  ┌───────────┐                                          │
-│                  │  APACHE   │ ── triggers quarterly ──▶ Spark          │
-│                  │  AIRFLOW  │                                          │
-│                  │   :8081   │                                          │
-│                  └───────────┘                                          │
-└─────────────────────────────────────────────────────────────────────────┘
+flowchart LR
+    A[("📄 CSV Dataset\nNYC Taxi 2020")] -->|publishes records| B
+
+    subgraph docker["🐳 Docker Bridge Network — pipeline-network"]
+        B["📨 Apache Kafka\nTopic: raw-data\ncp-kafka:7.3.0"]
+        C["🔧 Zookeeper\nKafka Coordination\ncp-zookeeper:7.3.0"]
+        D[("🗄️ PostgreSQL\nraw_data table\npostgres:15")]
+        E["⚡ Apache Spark\nBatch Processing\napache/spark:3.5.0"]
+        F[("🗄️ PostgreSQL\naggregated_data\npostgres:15")]
+        G["🌐 FastAPI\nREST API :8000"]
+        H["🕐 Apache Airflow\nQuarterly DAG :8081"]
+
+        B -->|consumes and stores| D
+        C <-->|coordinates| B
+        D -->|reads raw data| E
+        E -->|writes aggregated| F
+        F -->|queries| G
+        H -->|triggers quarterly| E
+    end
+
+    G -->|REST response| I[("🤖 ML Application\nQuarterly Retraining")]
 
 ## Project Structure
 data-engineering-batch-pipeline/
