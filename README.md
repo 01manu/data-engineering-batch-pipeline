@@ -9,55 +9,33 @@ Spark, PostgreSQL, Airflow, and FastAPI — all containerized with Docker.
 ## Architecture
 Data Source → Kafka → PostgreSQL (raw) → Spark → PostgreSQL (aggregated) → FastAPI → ML App
 
-flowchart LR
-    A[("📄 CSV Dataset\nNYC Taxi 2020")] -->|publishes records| B
-
-    subgraph docker["🐳 Docker Bridge Network — pipeline-network"]
-        B["📨 Apache Kafka\nTopic: raw-data\ncp-kafka:7.3.0"]
-        C["🔧 Zookeeper\nKafka Coordination\ncp-zookeeper:7.3.0"]
-        D[("🗄️ PostgreSQL\nraw_data table\npostgres:15")]
-        E["⚡ Apache Spark\nBatch Processing\napache/spark:3.5.0"]
-        F[("🗄️ PostgreSQL\naggregated_data\npostgres:15")]
-        G["🌐 FastAPI\nREST API :8000"]
-        H["🕐 Apache Airflow\nQuarterly DAG :8081"]
-
-        B -->|consumes and stores| D
-        C <-->|coordinates| B
-        D -->|reads raw data| E
-        E -->|writes aggregated| F
-        F -->|queries| G
-        H -->|triggers quarterly| E
-    end
-
-    G -->|REST response| I[("🤖 ML Application\nQuarterly Retraining")]
 
 ## Project Structure
 data-engineering-batch-pipeline/
-│
-├── docker-compose.yml           # IaC — defines all 7 microservices
-├── README.md                    # This file
+├── docker-compose.yml              # IaC — all 7 services, network, volumes
+├── README.md                       # This file
 │
 ├── kafka-producer/
-│   ├── Dockerfile               # python:3.11-slim image
-│   └── producer.py              # Reads CSV → Kafka topic + PostgreSQL
+│   ├── Dockerfile                  # python:3.11-slim + kafka-python + pandas
+│   └── producer.py                 # CSV → Kafka topic + PostgreSQL raw_data
 │
 ├── spark-processor/
-│   ├── Dockerfile               # apache/spark:3.5.0 image
-│   └── batch_job.py             # GroupBy aggregations via JDBC
+│   ├── Dockerfile                  # apache/spark:3.5.0 + psycopg2
+│   └── batch_job.py                # GroupBy aggregations via JDBC
 │
 ├── api/
-│   ├── Dockerfile               # python:3.11-slim image
-│   └── main.py                  # 5 REST endpoints (FastAPI)
+│   ├── Dockerfile                  # python:3.11-slim + fastapi + uvicorn
+│   └── main.py                     # 5 REST endpoints
 │
 ├── airflow/
 │   └── dags/
-│       └── batch_dag.py         # Quarterly DAG scheduler
+│       └── batch_dag.py            # Quarterly DAG: quality check → spark → notify
 │
 ├── jars/
-│   └── postgresql-42.7.3.jar    # PostgreSQL JDBC driver for Spark
+│   └── postgresql-42.7.3.jar       # PostgreSQL JDBC driver for Spark
 │
 └── data/
-    └── yellow_tripdata_2020-01.csv   # Dataset (not tracked in Git)
+    └── yellow_tripdata_2020-01.csv  # Dataset (not tracked in Git — too large)
 
 ## Quick Start (run the whole system)
 
