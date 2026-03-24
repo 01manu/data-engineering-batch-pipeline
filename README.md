@@ -12,30 +12,31 @@ Data Source → Kafka → PostgreSQL (raw) → Spark → PostgreSQL (aggregated)
 
 ## Project Structure
 data-engineering-batch-pipeline/
-├── docker-compose.yml              # IaC — all 7 services, network, volumes
-├── README.md                       # This file
-│
-├── kafka-producer/
-│   ├── Dockerfile                  # python:3.11-slim + kafka-python + pandas
-│   └── producer.py                 # CSV → Kafka topic + PostgreSQL raw_data
-│
-├── spark-processor/
-│   ├── Dockerfile                  # apache/spark:3.5.0 + psycopg2
-│   └── batch_job.py                # GroupBy aggregations via JDBC
-│
-├── api/
-│   ├── Dockerfile                  # python:3.11-slim + fastapi + uvicorn
-│   └── main.py                     # 5 REST endpoints
-│
-├── airflow/
-│   └── dags/
-│       └── batch_dag.py            # Quarterly DAG: quality check → spark → notify
-│
-├── jars/
-│   └── postgresql-42.7.3.jar       # PostgreSQL JDBC driver for Spark
-│
-└── data/
-    └── yellow_tripdata_2020-01.csv  # Dataset (not tracked in Git — too large)
+|
+|-- docker-compose.yml                  (IaC: all 7 services, network, volumes)
+|-- README.md                           (this file)
+|
+|-- kafka-producer/
+|   |-- Dockerfile                      (python:3.11-slim + kafka-python + pandas)
+|   +-- producer.py                     (CSV to Kafka topic + PostgreSQL raw_data)
+|
+|-- spark-processor/
+|   |-- Dockerfile                      (apache/spark:3.5.0 + psycopg2)
+|   +-- batch_job.py                    (GroupBy aggregations via JDBC)
+|
+|-- api/
+|   |-- Dockerfile                      (python:3.11-slim + fastapi + uvicorn)
+|   +-- main.py                         (5 REST endpoints)
+|
+|-- airflow/
+|   +-- dags/
+|       +-- batch_dag.py                (Quarterly DAG: quality check, spark, notify)
+|
+|-- jars/
+|   +-- postgresql-42.7.3.jar           (PostgreSQL JDBC driver for Spark)
+|
++-- data/
+    +-- yellow_tripdata_2020-01.csv     (Dataset - not tracked in Git, too large)
 
 ## Quick Start (run the whole system)
 
