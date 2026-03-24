@@ -54,9 +54,9 @@ docker-compose up --build
 # 4. Check the API
 curl http://localhost:8000/health
 curl http://localhost:8000/aggregated/summary
-```
 
 ## Services
+
 | Service | Port | Purpose |
 |---|---|---|
 | Kafka | 9092 | Message broker |
